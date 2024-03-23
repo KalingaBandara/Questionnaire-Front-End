@@ -17,8 +17,8 @@ export default function Result() {
 
   useEffect(() => {
     const ids = context.selectedOptions.map(x => x.qnId)
-    createAPIEndpoint(ENDPOINTS.getAnswers)
-      .post(ids)
+    createAPIEndpoint(ENDPOINTS.allQuestions)
+      .fetch()
       .then(res => {
         const qna = context.selectedOptions
           .map(x => ({

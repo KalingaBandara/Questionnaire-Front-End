@@ -1,16 +1,15 @@
 import axios from 'axios'
 
-export const BASE_URL = 'http://localhost:5041/';
+export const BASE_URL = 'http://localhost:8080/question/';
 
 export const ENDPOINTS = {
-    participant: 'participant',
-    question:'question',
-    getAnswers : 'question/getanswers'
+    get: 'get',
+    allQuestions:'allQuestions'
 }
 
 export const createAPIEndpoint = endpoint => {
 
-    let url = BASE_URL + 'api/' + endpoint + '/';
+    let url = BASE_URL + endpoint ;
     return {
         fetch: () => axios.get(url),
         fetchById: id => axios.get(url + id),
