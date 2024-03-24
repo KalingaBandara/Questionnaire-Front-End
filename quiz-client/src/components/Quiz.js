@@ -5,18 +5,21 @@ import { Card, CardContent, CardHeader, List, ListItemButton, Typography, Box, L
 import { getFormatedTime } from '../helper'
 import { useNavigate } from 'react-router'
 import  TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import Alert from '@mui/material/Alert';
 
 export default function Quiz() {
 
     const [qns, setQns] = useState([])
     const [qnIndex, setQnIndex] = useState(0)
     const [timeTaken, setTimeTaken] = useState(0)
-    const [generalFeedback, setGeneralFeedback] = useState(""); // Declare state variable for general feedback
-    const [selectedFeedback, setSelectedFeedback] = useState(""); // Declare state variable for selected feedback
+    const [generalFeedback, setGeneralFeedback] = useState("")
+    const [selectedFeedback, setSelectedFeedback] = useState("")
     const { context, setContext } = useStateContext()
     const navigate = useNavigate()
-    const [showFeedback, setShowFeedback] = useState(false); // <-- Define showFeedback state
-    const [showAlert, setShowAlert] = useState(false); // <-- Define showAlert state
+    const [showFeedback, setShowFeedback] = useState(false)
+    const [showAlert, setShowAlert] = useState(false)
+    const [optionsDisabled, setOptionsDisabled] = useState(false);
+    const [nextButtonClicked, setNextButtonClicked] = useState(false);
     
     let selectedQuestion;
 
@@ -47,26 +50,32 @@ export default function Quiz() {
     }, [])
 
     const updateAnswer = (qnId, optionIdx, optionText) => {
-        selectedQuestion = optionIdx;
-        qns[qnIndex].selectedOption = optionIdx;
-        const temp = [...context.selectedOptions]
-        temp.push({
+        // Create a copy of the selectedOptions array
+        const temp = context.selectedOptions.map(item => ({ ...item }));
+    
+        // Update the selected option for the current question
+        temp[qnIndex] = {
             qnId,
             selected: optionIdx,
             text: optionText
-        })
+        };
+    
+        // Update the context with the new selectedOptions array
+        setContext({ selectedOptions: temp });
+    
+        // Update feedback and navigate if necessary
         if (qnIndex < 9) {
-            setContext({ selectedOptions: [...temp] })
-            setSelectedFeedback(null)
-            updateFeedback(qnId, optionIdx)
+            setSelectedFeedback(null);
+            updateFeedback(qnId, optionIdx);
+            setNextButtonClicked(true);
+        } else {
+            setContext({ selectedOptions: temp, timeTaken });
+            navigate("/result");
         }
-        else {
-            setContext({ selectedOptions: [...temp], timeTaken })
-            navigate("/result")
-        }
-        console.log(qns);
-
-    }
+    };
+    
+    
+    
 
     const updateFeedback = (qnId, optionIdx) => {
         const selectedQuestion = qns.find(question => question.questionId === qnId);
@@ -83,18 +92,20 @@ export default function Quiz() {
     }
 
     const handleNextClick = () => {
-        if (context.selectedOptions[qnIndex]?.selected === undefined) {
-            setShowAlert(true); // Show alert
+        if (context.selectedOptions[qnIndex]?.selected === undefined || context.selectedOptions[qnIndex]?.selected === null) {
+            setShowAlert(true)
             setTimeout(() => {
-                setShowAlert(false); // Hide alert
-            }, 2000);
+                setShowAlert(false)
+            }, 4000);
             return
         }
-        setShowFeedback(true); 
+        setShowFeedback(true);
+        setOptionsDisabled(true); 
         setTimeout(() => {
-            setShowFeedback(false); // Hide feedback
-            setQnIndex(prevIndex => prevIndex + 1); // Move to the next question
-        }, 2000);     
+            setShowFeedback(false); 
+            setQnIndex(prevIndex => prevIndex + 1); 
+            setOptionsDisabled(false);
+        }, 1000);     
         
     }
 
@@ -118,11 +129,17 @@ export default function Quiz() {
                     </Typography>
                     <List>
                         {Object.keys(qns[qnIndex]).filter(key => key.startsWith('option')).map((key, idx) => (
-                            <ListItemButton disableRipple key={idx} onClick={() => updateAnswer(qns[qnIndex].questionId, idx, "")} selected={context.selectedOptions[qnIndex]?.selected === idx}>
-                                <div>
-                                    <b>{String.fromCharCode(65 + idx) + " . "}</b>{qns[qnIndex][key]}
-                                </div>
-                            </ListItemButton>
+                            <ListItemButton 
+                            disableRipple 
+                            key={idx} 
+                            onClick={() => updateAnswer(qns[qnIndex].questionId, idx, "")} 
+                            selected={context.selectedOptions[qnIndex]?.selected === idx}
+                            disabled={optionsDisabled} // Disable options if optionsDisabled is true
+                        >
+                            <div>
+                                <b>{String.fromCharCode(65 + idx) + " . "}</b>{qns[qnIndex][key]}
+                            </div>
+                        </ListItemButton>
                         ))}
                     </List>
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -156,10 +173,9 @@ export default function Quiz() {
                         '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
                     }}
                 >
-                    <CardHeader title= "Warning" />
                     <CardContent>
                         <Typography variant="body1">
-                        <TipsAndUpdatesIcon/> "Please select an option before moving to the next question."
+                        <Alert severity="info">Please select an option to continue.</Alert> 
                         </Typography>
                     </CardContent>
                 </Card>

@@ -1,116 +1,65 @@
-import { Alert, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
-import { Box } from '@mui/system'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { createAPIEndpoint, ENDPOINTS } from '../api'
+import { createAPIEndpoint, ENDPOINTS } from '../api';
+import { Alert, Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { getFormatedTime } from '../helper';
-import useStateContext from '../hooks/useStateContext'
-import { green } from '@mui/material/colors';
-import Answer from './Answer';
+import useStateContext from '../hooks/useStateContext';
 
 export default function Result() {
-  const { context, setContext } = useStateContext()
-  const [score, setScore] = useState(0)
-  const [qnAnswers, setQnAnswers] = useState([])
-  const [showAlert, setShowAlert] = useState(false)
-  const navigate = useNavigate()
+  const { context } = useStateContext();
+  const [score, setScore] = useState(0);
+  const [showAlert, setShowAlert] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const ids = context.selectedOptions.map(x => x.qnId)
-    createAPIEndpoint(ENDPOINTS.allQuestions)
-      .fetch()
-      .then(res => {
-        const qna = context.selectedOptions
-          .map(x => ({
-            ...x,
-            ...(res.data.find(y => y.qnId == x.qnId))
-          }))
-        setQnAnswers(qna)
-        calculateScore(qna)
+    calculateScore(context.selectedOptions);
+  }, []);
 
-      })
-      .catch(err => console.log(err))
-  }, [])
+  const calculateScore = (qna) => {
+    const requestBody = JSON.stringify(qna.map(item => ({ response: item.selected })));
+    console.log(requestBody); // Check the requestBody to ensure it's correctly formatted
+    
 
-  const calculateScore = qna => {
-    let tempScore = qna.reduce((acc, curr) => {
-      return curr.answer == curr.selected ? acc + 1 : acc;
-    }, 0)
-    setScore(tempScore)
-  }
-
-  const restart = () => {
-    setContext({
-      timeTaken: 0,
-      selectedOptions: []
+    createAPIEndpoint(ENDPOINTS.calculateScore)
+    .post(requestBody)
+    .then(response => {
+      if (response.status === 200) {
+        return response.data; // Assuming the response contains the calculated score
+      } else {
+        throw new Error('Failed to calculate score');
+      }
     })
-    navigate("/quiz")
-  }
-
-  const submitScore = () => {
-    createAPIEndpoint(ENDPOINTS.participant)
-      .put(context.participantId, {
-        participantId: context.participantId,
-        score: score,
-        timeTaken: context.timeTaken
+      .then(data => {
+        setScore(data); // Set the calculated score
       })
-      .then(res => {
-        setShowAlert(true)
-        setTimeout(() => {
-          setShowAlert(false)
-        }, 4000);
-      })
-      .catch(err => { console.log(err) })
-  }
+      .catch(error => {
+        console.error('Failed to calculate score:', error);
+        setShowAlert(true); // Show alert for error
+      });
+};
 
   return (
-    <>
-      <Card sx={{ mt: 5, display: 'flex', width: '100%', maxWidth: 640, mx: 'auto' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-          <CardContent sx={{ flex: '1 0 auto', textAlign: 'center' }}>
-            <Typography variant="h4">Congratulations!</Typography>
-            <Typography variant="h6">
-              YOUR SCORE
+    <div>
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Card sx={{ width: 400 }}>
+          <CardMedia
+            component="img"
+            height="140"
+            image="/static/images/cards/contemplative-reptile.jpg"
+            alt="green iguana"
+          />
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              Your Score: {score}
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              <Typography variant="span" color={green[500]}>
-                {score}
-              </Typography>/5
+            <Typography variant="body2" color="text.secondary">
+              Other details can be displayed here
             </Typography>
-            <Typography variant="h6">
-              Took {getFormatedTime(context.timeTaken) + ' mins'}
-            </Typography>
-            <Button variant="contained"
-              sx={{ mx: 1 }}
-              size="small"
-              onClick={submitScore}>
-              Submit
-            </Button>
-            <Button variant="contained"
-              sx={{ mx: 1 }}
-              size="small"
-              onClick={restart}>
-              Re-try
-            </Button>
-            <Alert
-              severity="success"
-              variant="string"
-              sx={{
-                width: '60%',
-                m: 'auto',
-                visibility: showAlert ? 'visible' : 'hidden'
-              }}>
-              Score Updated.
-            </Alert>
           </CardContent>
-        </Box>
-        <CardMedia
-          component="img"
-          sx={{ width: 220 }}
-          image="./result.png"
-        />
-      </Card>
-      <Answer qnAnswers={qnAnswers} />
-    </>
-  )
+          <Button variant="contained" onClick={() => navigate('/')} >Finish</Button>
+        </Card>
+      </Box>
+      {showAlert && <Alert severity="error">Failed to calculate score</Alert>}
+    </div>
+  );
 }

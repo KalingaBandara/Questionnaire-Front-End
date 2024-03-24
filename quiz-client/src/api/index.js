@@ -1,20 +1,29 @@
-import axios from 'axios'
+import axios from 'axios';
 
 export const BASE_URL = 'http://localhost:8080/question/';
 
 export const ENDPOINTS = {
     get: 'get',
-    allQuestions:'allQuestions'
-}
+    allQuestions: 'allQuestions',
+    calculateScore: 'calculateScore'
+};
 
 export const createAPIEndpoint = endpoint => {
-
     let url = BASE_URL + endpoint ;
+
+    const instance = axios.create({
+        baseURL: url
+    });
+
     return {
-        fetch: () => axios.get(url),
-        fetchById: id => axios.get(url + id),
-        post: newRecord => axios.post(url, newRecord),
-        put: (id, updatedRecord) => axios.put(url + id, updatedRecord),
-        delete: id => axios.delete(url + id),
-    }
-}
+        fetch: () => instance.get(),
+        fetchById: id => instance.get(id),
+        post: newRecord => instance.post('', newRecord, {
+            headers: {
+                'Content-Type': 'application/json' // Set Content-Type header to application/json for POST requests
+            }
+        }),
+        put: (id, updatedRecord) => instance.put(id, updatedRecord),
+        delete: id => instance.delete(id)
+    };
+};
