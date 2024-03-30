@@ -18,6 +18,7 @@ export default function Result() {
     .fetch()
     .then(response => {
       if (response.status === 200) {
+        calculateScore(context.selectedOptions);
       } else {
         throw new Error('Failed to update attempt status');
       }
@@ -28,10 +29,29 @@ export default function Result() {
     });
 }, []);
 
-useEffect(() => {
-  // Update the score when the context changes
-  setScore(context.score);
-}, [context.score]);
+  const calculateScore = (qna) => {
+    const requestBody = JSON.stringify(qna.map(item => ({ response: item.selected })));
+
+    createAPIEndpoint(ENDPOINTS.calculateScore)
+    .post(requestBody)
+    .then(response => {
+      if (response.status === 200) {
+        return response.data; // Assuming the response contains the calculated score
+      } else {
+        throw new Error('Failed to calculate score');
+      }
+    })
+      .then(data => {
+        setScore(data);
+      })
+      .catch(error => {
+        console.error('Failed to calculate score:', error);
+        setShowAlert(true); 
+      });
+};
+
+
+
 
 let scoreColor;
   if (score >= 7) {

@@ -19,7 +19,7 @@ export default function Start() {
 
     const start = () => {
 
-        const endpoint = createAPIEndpoint(ENDPOINTS.get);
+        const endpoint = createAPIEndpoint(ENDPOINTS.getQuestions);
         endpoint.fetch()
                 .then(res => {
                     setContext({ id: res.data.id })
