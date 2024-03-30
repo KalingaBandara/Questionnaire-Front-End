@@ -16,6 +16,7 @@ export default function Quiz() {
     const [generalFeedback, setGeneralFeedback] = useState("")
     const [selectedFeedback, setSelectedFeedback] = useState("")
     const { context, setContext } = useStateContext()
+    const [score, setScore] = useState(0);
     const navigate = useNavigate()
     const [showFeedback, setShowFeedback] = useState(false)
     const [showAlert, setShowAlert] = useState(false)
@@ -72,7 +73,7 @@ export default function Quiz() {
         } 
         else {
             setContext({ selectedOptions: temp, timeTaken });
-            navigate("/result");
+            
         }
     };
     
@@ -98,13 +99,39 @@ export default function Quiz() {
             }, 4000);
             return
         }
+
         setShowFeedback(true);
         setOptionsDisabled(true); 
         setTimeout(() => {
             setShowFeedback(false); 
             setQnIndex(prevIndex => prevIndex + 1); 
             setOptionsDisabled(false);
-        }, 1000);     
+        }, 1000);    
+        
+        
+        if (qnIndex === 9) {
+            const requestBody = JSON.stringify(context.selectedOptions.map(item => ({ response: item.selected })));
+            console.log('Request Body:', requestBody);
+            createAPIEndpoint(ENDPOINTS.calculateScore)
+                .post(requestBody)
+                .then(response => {
+                    if (response.status === 200) {
+                        setScore(response.data);
+                        navigate("/result");
+                        return response.data; // Assuming the response contains the calculated score
+                        
+                    } else {
+                        throw new Error('Failed to calculate score');
+                    }
+                })
+                .then(data => {
+                    setScore(data);
+                })
+                .catch(error => {
+                    console.error('Failed to calculate score:', error);
+                    setShowAlert(true);
+                });
+        }
         
     }
 
