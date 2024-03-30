@@ -21,7 +21,9 @@ export default function Quiz() {
     const [showAlert, setShowAlert] = useState(false)
     const [optionsDisabled, setOptionsDisabled] = useState(false);
     const [nextButtonClicked, setNextButtonClicked] = useState(false);
-    
+    const [showUnavailableAlert,setShowUnavailableAlert] = useState(false)
+
+
     let selectedQuestion;
 
     let timer;
@@ -37,15 +39,24 @@ export default function Quiz() {
             timeTaken: 0,
             selectedOptions: []
         })
+        
+        //const qns = api.getQuestions();
         createAPIEndpoint(ENDPOINTS.getQuestions)
             .fetch() 
             .then(res => {
                 const updatedData = res.data.map(item => ({ ...item, selectedOption: "" }));
-
+//
                 setQns(updatedData);
                 startTimer()
             })
-            .catch(err => { console.log(err); })
+            .catch(err => { 
+                console.log(err); 
+                setShowUnavailableAlert(true);
+                setTimeout(() => {
+                    setShowUnavailableAlert(false);
+                    navigate('/result');
+                }, 1500);
+            });
 
         return () => { clearInterval(timer) }
     }, [])
@@ -72,8 +83,8 @@ export default function Quiz() {
         } 
         else {
             setContext({ selectedOptions: temp, timeTaken });
-            navigate("/result");
-        }
+            
+            }
     };
     
     const updateFeedback = (qnId, optionIdx) => {
@@ -102,11 +113,42 @@ export default function Quiz() {
         setOptionsDisabled(true); 
         setTimeout(() => {
             setShowFeedback(false); 
-            setQnIndex(prevIndex => prevIndex + 1); 
+            if (qnIndex<9)
+                setQnIndex(prevIndex => prevIndex + 1); 
             setOptionsDisabled(false);
+    
+            if (qnIndex === 9) {
+                console.log("navigated to /result");
+    
+                createAPIEndpoint(ENDPOINTS.updateAttemptStatus)
+                    .fetch()
+                    .then(response => {
+                        if (response.status === 200) {
+                            const requestBody = JSON.stringify(context.selectedOptions.map(item => ({ response: item.selected })));
+                            return createAPIEndpoint(ENDPOINTS.calculateScore)
+                                .post(requestBody);
+                        } else {
+                            throw new Error('Failed to update attempt status');
+                        }
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            return response.data;
+                        } else {
+                            throw new Error('Failed to calculate score');
+                        }
+                    })
+                    .then(data => {
+                        navigate("/result");
+                    })
+                    .catch(error => {
+                        console.error('Error updating attempt status or calculating score:', error);
+                        setShowAlert(true);
+                    });
+            }
         }, 1000);     
-        
     }
+    
 
     return (
         qns.length !== 0 
@@ -177,7 +219,27 @@ export default function Quiz() {
                         </CardContent>
                     </Card>
                 }
+
+                
             </>
-            : null
-        )
+            : 
+            (
+                showUnavailableAlert &&
+                <Card
+                sx={{
+                    maxWidth: 640, mx: 'auto', mt: 5,
+                    '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
+                }}
+            >
+                <CardContent>
+                    <Typography variant="body1">
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                    You have already attempted the quiz. 
+                </Alert>
+                    </Typography>
+
+                    </CardContent>
+            </Card>     
+            )
+    );
 }

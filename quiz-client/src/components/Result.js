@@ -14,41 +14,21 @@ export default function Result() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    createAPIEndpoint(ENDPOINTS.updateAttemptStatus)
+    createAPIEndpoint(ENDPOINTS.getScore)
     .fetch()
     .then(response => {
       if (response.status === 200) {
-        calculateScore(context.selectedOptions);
+        setScore(response.data);
       } else {
-        throw new Error('Failed to update attempt status');
+        throw new Error('Failed to get score');
       }
     })
     .catch(error => {
-      console.error('Error updating attempt status:', error);
+      console.error('Error getting score:', error);
       setShowAlert(true);
     });
 }, []);
 
-  const calculateScore = (qna) => {
-    const requestBody = JSON.stringify(qna.map(item => ({ response: item.selected })));
-
-    createAPIEndpoint(ENDPOINTS.calculateScore)
-    .post(requestBody)
-    .then(response => {
-      if (response.status === 200) {
-        return response.data; // Assuming the response contains the calculated score
-      } else {
-        throw new Error('Failed to calculate score');
-      }
-    })
-      .then(data => {
-        setScore(data);
-      })
-      .catch(error => {
-        console.error('Failed to calculate score:', error);
-        setShowAlert(true); 
-      });
-};
 
 
 
@@ -85,9 +65,21 @@ let scoreColor;
             <Typography variant="h6">
               You got {getFormatedTime(context.timeTaken) + ' mins'}
             </Typography>
+            
             <Typography variant="body2" color="text.secondary">
             You have completed the quiz.
             </Typography>
+
+            <Button variant="contained" color="primary" sx={{
+                                    mt: 2,  
+                                    bgcolor: 'green',
+                                    '&:hover': {
+                                        bgcolor: '#1b5e20', // Darker green when hovered
+                                    },
+                                 }}>
+              Continue
+            </Button>
+
           </CardContent>
         </Box>
         <CardMedia
