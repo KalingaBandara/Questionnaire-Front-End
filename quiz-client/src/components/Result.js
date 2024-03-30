@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { createAPIEndpoint, ENDPOINTS } from '../api';
 import { Alert, Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { getFormatedTime } from '../helper';
+import { green, yellow, red } from '@mui/material/colors';
 import useStateContext from '../hooks/useStateContext';
 
 export default function Result() {
@@ -38,27 +39,50 @@ export default function Result() {
       });
 };
 
+let scoreColor;
+  if (score >= 7) {
+    scoreColor = green[500];
+  } else if (score >= 4 && score <= 6) {
+    scoreColor = yellow[500];
+  } else {
+    scoreColor = red[500];
+  }
+
   return (
     <div>
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Card sx={{ width: 400 }}>
-          <CardMedia
-            component="img"
-            height="140"
-            image="/static/images/cards/contemplative-reptile.jpg"
-            alt="green iguana"
-          />
+      <Card sx={{ mt: 5, display: 'flex', width: '100%', maxWidth: 640, mx: 'auto' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Your Score: {score}
+            <Typography variant="h4">
+              Congratulations! 
+            </Typography>
+
+            <Typography variant="h6">
+              YOUR SCORE
+            </Typography>
+
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <Typography variant="span" style={{ color: scoreColor }}>
+
+                {score}
+              </Typography>/10
+            </Typography>
+
+            <Typography variant="h6">
+              You got {getFormatedTime(context.timeTaken) + ' mins'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Other details can be displayed here
+            You have completed the quiz.
             </Typography>
           </CardContent>
           <Button variant="contained" onClick={() => navigate('/')} >Finish</Button>
-        </Card>
-      </Box>
+        </Box>
+        <CardMedia
+          component="img"
+          sx={{ width: 220 }}
+          image="./result.png"
+        />
+      </Card>
       {showAlert && <Alert severity="error">Failed to calculate score</Alert>}
     </div>
   );
