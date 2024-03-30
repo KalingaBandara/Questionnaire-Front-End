@@ -6,6 +6,7 @@ import { getFormatedTime } from '../helper';
 import { green, yellow, red } from '@mui/material/colors';
 import useStateContext from '../hooks/useStateContext';
 
+
 export default function Result() {
   const { context } = useStateContext();
   const [score, setScore] = useState(0);
@@ -13,13 +14,23 @@ export default function Result() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    calculateScore(context.selectedOptions);
-  }, []);
+    createAPIEndpoint(ENDPOINTS.updateAttemptStatus)
+    .fetch()
+    .then(response => {
+      if (response.status === 200) {
+        calculateScore(context.selectedOptions);
+      } else {
+        throw new Error('Failed to update attempt status');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating attempt status:', error);
+      setShowAlert(true);
+    });
+}, []);
 
   const calculateScore = (qna) => {
     const requestBody = JSON.stringify(qna.map(item => ({ response: item.selected })));
-    console.log(requestBody); // Check the requestBody to ensure it's correctly formatted
-    
 
     createAPIEndpoint(ENDPOINTS.calculateScore)
     .post(requestBody)
@@ -31,13 +42,16 @@ export default function Result() {
       }
     })
       .then(data => {
-        setScore(data); // Set the calculated score
+        setScore(data);
       })
       .catch(error => {
         console.error('Failed to calculate score:', error);
-        setShowAlert(true); // Show alert for error
+        setShowAlert(true); 
       });
 };
+
+
+
 
 let scoreColor;
   if (score >= 7) {
@@ -75,7 +89,6 @@ let scoreColor;
             You have completed the quiz.
             </Typography>
           </CardContent>
-          <Button variant="contained" onClick={() => navigate('/')} >Finish</Button>
         </Box>
         <CardMedia
           component="img"
@@ -83,7 +96,6 @@ let scoreColor;
           image="./result.png"
         />
       </Card>
-      {showAlert && <Alert severity="error">Failed to calculate score</Alert>}
     </div>
   );
 }

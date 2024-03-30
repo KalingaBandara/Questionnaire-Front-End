@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { Box } from '@mui/system'
 import Center from './Center'
@@ -17,19 +17,16 @@ export default function Start() {
         resetContext()
     }, [])
 
-
     const start = () => {
-        const endpoint = createAPIEndpoint(ENDPOINTS.get);
-        console.log('Endpoint:', endpoint);
-        endpoint
 
-                .fetch()
+        const endpoint = createAPIEndpoint(ENDPOINTS.get);
+        endpoint.fetch()
                 .then(res => {
                     setContext({ id: res.data.id })
-                    console.log(context)
                     navigate('/quiz')
                 })
                 .catch(err => console.log(err))
+        
     }
 
     return (

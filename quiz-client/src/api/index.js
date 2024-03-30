@@ -1,12 +1,16 @@
 import axios from 'axios';
 
-export const BASE_URL = 'http://localhost:8080/question/';
+export const BASE_URL = 'http://localhost:8080/';
 
 export const ENDPOINTS = {
-    get: 'get',
-    allQuestions: 'allQuestions',
-    calculateScore: 'calculateScore'
+    get: 'question/get',
+    allQuestions: 'question/allQuestions',
+    calculateScore: 'question/calculateScore',
+    updateAttemptStatus: 'api/updateAttemptStatus'
 };
+
+const API_KEY = 'NjVkNDIyMjNmMjc3NmU3OTI5MWJmZGI0OjY1ZDQyMjIzZjI3NzZlNzkyOTFiZmRhYQ';
+
 
 export const createAPIEndpoint = endpoint => {
     let url = BASE_URL + endpoint ;
@@ -14,6 +18,9 @@ export const createAPIEndpoint = endpoint => {
     const instance = axios.create({
         baseURL: url
     });
+
+    instance.defaults.headers.common['API-Key'] = API_KEY;
+
 
     return {
         fetch: () => instance.get(),

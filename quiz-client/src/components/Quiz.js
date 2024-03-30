@@ -4,8 +4,9 @@ import useStateContext from '../hooks/useStateContext'
 import { Card, CardContent, CardHeader, List, ListItemButton, Typography, Box, LinearProgress, Button } from '@mui/material'
 import { getFormatedTime } from '../helper'
 import { useNavigate } from 'react-router'
-import  TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import Alert from '@mui/material/Alert';
+
 
 export default function Quiz() {
 
@@ -68,15 +69,13 @@ export default function Quiz() {
             setSelectedFeedback(null);
             updateFeedback(qnId, optionIdx);
             setNextButtonClicked(true);
-        } else {
+        } 
+        else {
             setContext({ selectedOptions: temp, timeTaken });
             navigate("/result");
         }
     };
     
-    
-    
-
     const updateFeedback = (qnId, optionIdx) => {
         const selectedQuestion = qns.find(question => question.questionId === qnId);
         if (selectedQuestion) {
@@ -110,80 +109,75 @@ export default function Quiz() {
     }
 
     return (
-        qns.length != 0
+        qns.length !== 0 
             ? <>
-            <Card
-                sx={{
-                    maxWidth: 640, mx: 'auto', mt: 5,
-                    '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
-                }}>
-                <CardHeader
-                    title={'Question ' + (qnIndex + 1) + ' of 10'}
-                    action={<Typography>{getFormatedTime(timeTaken)}</Typography>} />
-                <Box>
-                    <LinearProgress variant="determinate" value={(qnIndex + 1) * 100 / 10} />
-                </Box>
-                <CardContent>
-                    <Typography variant="h6">
-                        {qns[qnIndex].questionTitle}
-                    </Typography>
-                    <List>
-                        {Object.keys(qns[qnIndex]).filter(key => key.startsWith('option')).map((key, idx) => (
-                            <ListItemButton 
-                            disableRipple 
-                            key={idx} 
-                            onClick={() => updateAnswer(qns[qnIndex].questionId, idx, "")} 
-                            selected={context.selectedOptions[qnIndex]?.selected === idx}
-                            disabled={optionsDisabled} // Disable options if optionsDisabled is true
-                        >
-                            <div>
-                                <b>{String.fromCharCode(65 + idx) + " . "}</b>{qns[qnIndex][key]}
-                            </div>
-                        </ListItemButton>
-                        ))}
-                    </List>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button variant="outlined" size="large" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }} onClick={handleNextClick}>Next</Button>
-                    </div>
-
-
-                </CardContent>
-            </Card>
-
-            {showFeedback &&
                 <Card
                     sx={{
                         maxWidth: 640, mx: 'auto', mt: 5,
                         '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
-                    }}
-                >
-                    <CardHeader title= {selectedFeedback} />
+                    }}>
+                    <CardHeader
+                        title={'Question ' + (qnIndex + 1) + ' of 10'}
+                        action={<Typography>{getFormatedTime(timeTaken)}</Typography>} />
+                    <Box>
+                        <LinearProgress variant="determinate" value={(qnIndex + 1) * 100 / 10} />
+                    </Box>
                     <CardContent>
-                        <Typography variant="body1">
-                        <TipsAndUpdatesIcon/> {generalFeedback || "Fetching general feedback..."}
+                        <Typography variant="h6">
+                            {qns[qnIndex].questionTitle}
                         </Typography>
+                        <List>
+                            {Object.keys(qns[qnIndex]).filter(key => key.startsWith('option')).map((key, idx) => (
+                                <ListItemButton 
+                                    disableRipple 
+                                    key={idx} 
+                                    onClick={() => updateAnswer(qns[qnIndex].questionId, idx, "")} 
+                                    selected={context.selectedOptions[qnIndex]?.selected === idx}
+                                    disabled={optionsDisabled} // Disable options if optionsDisabled is true
+                                >
+                                    <div>
+                                        <b>{String.fromCharCode(65 + idx) + " . "}</b>{qns[qnIndex][key]}
+                                    </div>
+                                </ListItemButton>
+                            ))}
+                        </List>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="outlined" size="large" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }} onClick={handleNextClick}>Next</Button>
+                        </div>
                     </CardContent>
                 </Card>
-            }
 
-            {showAlert &&
-                <Card
-                    sx={{
-                        maxWidth: 640, mx: 'auto', mt: 5,
-                        '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
-                    }}
-                >
-                    <CardContent>
-                        <Typography variant="body1">
-                        <Alert severity="info">Please select an option to continue.</Alert> 
-                        </Typography>
-                    </CardContent>
-                </Card>
-            }   
+                {showFeedback &&
+                    <Card
+                        sx={{
+                            maxWidth: 640, mx: 'auto', mt: 5,
+                            '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
+                        }}
+                    >
+                        <CardHeader title= {selectedFeedback} />
+                        <CardContent>
+                            <Typography variant="body1">
+                                <TipsAndUpdatesIcon/> {generalFeedback || "Fetching general feedback..."}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                }
 
-
-                    
+                {showAlert &&
+                    <Card
+                        sx={{
+                            maxWidth: 640, mx: 'auto', mt: 5,
+                            '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
+                        }}
+                    >
+                        <CardContent>
+                            <Typography variant="body1">
+                                <Alert severity="info">Please select an option to continue.</Alert> 
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                }
             </>
             : null
-    )
+        )
 }
