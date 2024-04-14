@@ -9,7 +9,7 @@ export const ENDPOINTS = {
     updateAttemptStatus: 'api/updateAttemptStatus'
 };
 
-const API_KEY = 'NjVkNDIyMjNmMjc3NmU3OTI5MWJmZGI0OjY1ZDQyMjIzZjI3NzZlNzkyOTFiZmRhYQ';
+const JWT_Token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvdmVyc2lnaHRfZzE1IiwiaWF0IjoxNzEzMDgwNjM5LCJleHAiOjE3MTMxMTY2Mzl9.6mbsfFCybJBp1TssAPynmiARQHmeQ5Vxa5H8EUN1ThhP01G_1D0EU1Kc8YDq6zBjAQDkVC1ShguNWaNAEzEubw';
 
 
 export const createAPIEndpoint = endpoint => {
@@ -19,7 +19,7 @@ export const createAPIEndpoint = endpoint => {
         baseURL: url
     });
 
-    instance.defaults.headers.common['API-Key'] = API_KEY;
+    instance.defaults.headers.common['JWT-Token'] = JWT_Token;
 
 
     return {

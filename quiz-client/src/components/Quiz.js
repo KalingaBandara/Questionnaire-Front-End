@@ -119,7 +119,8 @@ export default function Quiz() {
     
             if (qnIndex === 9) {
                 console.log("navigated to /result");
-    
+                console.log("Selected options array:", context.selectedOptions);
+
                 createAPIEndpoint(ENDPOINTS.updateAttemptStatus)
                     .fetch()
                     .then(response => {
