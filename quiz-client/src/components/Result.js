@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createAPIEndpoint, ENDPOINTS } from '../api';
 import { Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { green, yellow, red } from '@mui/material/colors';
-
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 export default function Result() {
   
@@ -37,14 +37,19 @@ let scoreColor;
     scoreColor = red[500];
   }
 
+  const lawnMowers = Math.floor(score / 2);
+
   return (
     <div>
       <Card sx={{ mt: 5, display: 'flex', width: '100%', maxWidth: 640, mx: 'auto' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <CardContent>
-            <Typography variant="h4">
-              Congratulations! 
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h3">
+                Congratulations
             </Typography>
+            <AutoAwesomeIcon sx={{ ml: 1, fontSize: 'h3.fontSize' }} />
+          </Box>
 
             <Typography variant="h6">
               YOUR SCORE
@@ -62,15 +67,7 @@ let scoreColor;
             You have completed the quiz.
             </Typography>
 
-            <Button variant="contained" color="primary" sx={{
-                                    mt: 2,  
-                                    bgcolor: 'green',
-                                    '&:hover': {
-                                        bgcolor: '#1b5e20', // Darker green when hovered
-                                    },
-                                 }}>
-              Continue
-            </Button>
+            
 
           </CardContent>
         </Box>
@@ -80,6 +77,38 @@ let scoreColor;
           image="./result.png"
         />
       </Card>
+
+      <Card sx={{ mt: 3, display: 'flex', width: '100%', maxWidth: 640, mx: 'auto' }}>
+                <CardMedia
+                    component="img"
+                    sx={{ width: 150 }}
+                    image="./LawnMower.webp"
+                    alt="Lawn Mower"
+                />
+                <CardContent>
+                <Typography variant="h5">
+                    You are rewarded with
+                </Typography>
+                <Typography variant="h3" sx={{ fontWeight: 600 }}>
+                    <Typography variant="span" style={{ color: scoreColor }}>
+                        {lawnMowers}
+                    </Typography>{" "}
+                    Lawn Mowers
+                </Typography>
+
+                <Button variant="contained" color="primary" sx={{
+                                    mt: 2,  
+                                    bgcolor: 'green',
+                                    '&:hover': {
+                                        bgcolor: '#1b5e20', 
+                                    },
+                                 }}>
+              Continue
+            </Button>
+                    
+                    
+                </CardContent>
+            </Card>
     </div>
   );
 }
