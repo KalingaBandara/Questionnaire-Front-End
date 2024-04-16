@@ -20,11 +20,12 @@ export default function Quiz() {
     const [showFeedback, setShowFeedback] = useState(false)
     const [showAlert, setShowAlert] = useState(false)
     const [optionsDisabled, setOptionsDisabled] = useState(false);
-    const [nextButtonClicked, setNextButtonClicked] = useState(false);
     const [showUnavailableAlert,setShowUnavailableAlert] = useState(false)
+    const [showCheckButton, setShowCheckButton] = useState(true);
 
 
-    let selectedQuestion;
+    const jwtToken = localStorage.getItem('jwtToken');
+
 
     let timer;
 
@@ -38,14 +39,13 @@ export default function Quiz() {
         setContext({
             timeTaken: 0,
             selectedOptions: []
-        })
+        });
+
         
-        //const qns = api.getQuestions();
-        createAPIEndpoint(ENDPOINTS.getQuestions)
+        createAPIEndpoint(ENDPOINTS.getQuestions,jwtToken)
             .fetch() 
             .then(res => {
                 const updatedData = res.data.map(item => ({ ...item, selectedOption: "" }));
-//
                 setQns(updatedData);
                 startTimer()
             })
@@ -61,7 +61,8 @@ export default function Quiz() {
         return () => { clearInterval(timer) }
     }, [])
 
-    const updateAnswer = (qnId, optionIdx, optionText) => {
+    const updateAnswer = (qnId, optionIdx) => {
+
         // Create a copy of the selectedOptions array
         const temp = context.selectedOptions.map(item => ({ ...item }));
     
@@ -69,7 +70,6 @@ export default function Quiz() {
         temp[qnIndex] = {
             qnId,
             selected: optionIdx,
-            text: optionText
         };
     
         // Update the context with the new selectedOptions array
@@ -79,7 +79,7 @@ export default function Quiz() {
         if (qnIndex < 9) {
             setSelectedFeedback(null);
             updateFeedback(qnId, optionIdx);
-            setNextButtonClicked(true);
+            setShowCheckButton(true)
         } 
         else {
             setContext({ selectedOptions: temp, timeTaken });
@@ -101,33 +101,43 @@ export default function Quiz() {
         }
     }
 
-    const handleNextClick = () => {
+    const handleFeedbackClick = () => {
+        // Check if an option is selected
         if (context.selectedOptions[qnIndex]?.selected === undefined || context.selectedOptions[qnIndex]?.selected === null) {
-            setShowAlert(true)
+            setShowAlert(true);
             setTimeout(() => {
-                setShowAlert(false)
+                setShowAlert(false);
             }, 4000);
-            return
+            return;
         }
-        setShowFeedback(true);
-        setOptionsDisabled(true); 
-        setTimeout(() => {
-            setShowFeedback(false); 
-            if (qnIndex<9)
-                setQnIndex(prevIndex => prevIndex + 1); 
-            setOptionsDisabled(false);
     
-            if (qnIndex === 9) {
-                console.log("navigated to /result");
+        // Show feedback and disable options
+        setShowFeedback(true);
+        setOptionsDisabled(true);
+        setShowCheckButton(false);
+    };
+    
+    const handleNextClick = () => {
+        // Hide feedback and enable options after a delay
+        setTimeout(() => {
+            setShowFeedback(false);
+            setOptionsDisabled(false);
+            setShowCheckButton(true);
+    
+            // Move to the next question
+            if (qnIndex < 9) {
+                setQnIndex(prevIndex => prevIndex + 1);
+            } else if (qnIndex === 9) {
+                // If it's the last question, navigate to the result
+                console.log("Navigated to /result");
                 console.log("Selected options array:", context.selectedOptions);
-
-                createAPIEndpoint(ENDPOINTS.updateAttemptStatus)
+    
+                createAPIEndpoint(ENDPOINTS.updateAttemptStatus, jwtToken)
                     .fetch()
                     .then(response => {
                         if (response.status === 200) {
                             const requestBody = JSON.stringify(context.selectedOptions.map(item => ({ response: item.selected })));
-                            return createAPIEndpoint(ENDPOINTS.calculateScore)
-                                .post(requestBody);
+                            return createAPIEndpoint(ENDPOINTS.calculateScore, jwtToken).post(requestBody);
                         } else {
                             throw new Error('Failed to update attempt status');
                         }
@@ -147,8 +157,9 @@ export default function Quiz() {
                         setShowAlert(true);
                     });
             }
-        }, 1000);     
-    }
+        }, 500);
+    };
+    
     
 
     return (
@@ -163,7 +174,11 @@ export default function Quiz() {
                         title={'Question ' + (qnIndex + 1) + ' of 10'}
                         action={<Typography>{getFormatedTime(timeTaken)}</Typography>} />
                     <Box>
-                        <LinearProgress variant="determinate" value={(qnIndex + 1) * 100 / 10} />
+                        <LinearProgress 
+                        variant="determinate"
+                        color="success"
+                        value={(qnIndex + 1) * 100 / 10}
+                         />
                     </Box>
                     <CardContent>
                         <Typography variant="h6">
@@ -184,9 +199,14 @@ export default function Quiz() {
                                 </ListItemButton>
                             ))}
                         </List>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant="outlined" size="large" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }} onClick={handleNextClick}>Next</Button>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        {showCheckButton && (
+                                <Button variant="outlined" color="success" size="large" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }} onClick={handleFeedbackClick}>
+                                    Check
+                                </Button>
+                            )}
                         </div>
+                        
                     </CardContent>
                 </Card>
 
@@ -197,11 +217,20 @@ export default function Quiz() {
                             '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' }
                         }}
                     >
-                        <CardHeader title= {selectedFeedback} />
+                        <CardHeader title= {selectedFeedback}
+                        sx={{ color: '#D4A017' }} />
                         <CardContent>
                             <Typography variant="body1">
                                 <TipsAndUpdatesIcon/> {generalFeedback || "Fetching general feedback..."}
                             </Typography>
+
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            {!showCheckButton && (
+                                <Button variant="outlined" color="success" size="large" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }} onClick={handleNextClick}>
+                                    Next
+                                </Button>
+                            )}
+                        </div>
                         </CardContent>
                     </Card>
                 }

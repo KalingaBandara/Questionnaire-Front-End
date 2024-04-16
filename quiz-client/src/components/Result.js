@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 import { createAPIEndpoint, ENDPOINTS } from '../api';
-import { Alert, Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
-import { getFormatedTime } from '../helper';
+import { Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { green, yellow, red } from '@mui/material/colors';
-import useStateContext from '../hooks/useStateContext';
 
 
 export default function Result() {
-  const { context } = useStateContext();
+  
   const [score, setScore] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
-  const navigate = useNavigate();
+  const jwtToken = localStorage.getItem('jwtToken');
 
   useEffect(() => {
-    createAPIEndpoint(ENDPOINTS.getScore)
+    createAPIEndpoint(ENDPOINTS.getScore, jwtToken)
     .fetch()
     .then(response => {
       if (response.status === 200) {
@@ -27,9 +24,7 @@ export default function Result() {
       console.error('Error getting score:', error);
       setShowAlert(true);
     });
-}, []);
-
-
+}, [setShowAlert]);
 
 
 
@@ -55,16 +50,13 @@ let scoreColor;
               YOUR SCORE
             </Typography>
 
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <Typography variant="h3" sx={{ fontWeight: 600 }}>
             <Typography variant="span" style={{ color: scoreColor }}>
 
                 {score}
               </Typography>/10
             </Typography>
 
-            <Typography variant="h6">
-              You got {getFormatedTime(context.timeTaken) + ' mins'}
-            </Typography>
             
             <Typography variant="body2" color="text.secondary">
             You have completed the quiz.

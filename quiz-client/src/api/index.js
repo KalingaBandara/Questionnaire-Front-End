@@ -9,10 +9,9 @@ export const ENDPOINTS = {
     updateAttemptStatus: 'api/updateAttemptStatus'
 };
 
-const JWT_Token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvdmVyc2lnaHRfZzE1IiwiaWF0IjoxNzEzMDgwNjM5LCJleHAiOjE3MTMxMTY2Mzl9.6mbsfFCybJBp1TssAPynmiARQHmeQ5Vxa5H8EUN1ThhP01G_1D0EU1Kc8YDq6zBjAQDkVC1ShguNWaNAEzEubw';
+//const JWT_Token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvdmVyc2lnaHRfZzE1IiwiaWF0IjoxNzEzMTcxNzI5LCJleHAiOjE3MTMyMDc3Mjl9.5_3Fn7UGjjH1O64RTiIFQI-_V26XU34kok8woIffPvbq0vI0Lkol0k4-Revx7JtSRR_XH0ojeZFk1Y-5VdGgng';
 
-
-export const createAPIEndpoint = endpoint => {
+export const createAPIEndpoint = (endpoint,JWT_Token) => {
     let url = BASE_URL + endpoint ;
 
     const instance = axios.create({

@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes burningEffect {
+  0%, 100% {
+      filter: brightness(150%);
+  }
+  50% {
+      filter: brightness(200%);
+  }
+}
