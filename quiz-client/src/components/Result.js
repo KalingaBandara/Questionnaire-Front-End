@@ -102,7 +102,8 @@ let scoreColor;
                                     '&:hover': {
                                         bgcolor: '#1b5e20', 
                                     },
-                                 }}>
+                                 }}
+                                 onClick={() => window.location.href = 'http://localhost:64866/'} >
               Continue
             </Button>
                     

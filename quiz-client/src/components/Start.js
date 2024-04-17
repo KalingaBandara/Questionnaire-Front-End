@@ -123,7 +123,8 @@ export default function Start() {
                 >
                     <Typography component="li">You have only one quiz attempt.</Typography>
                     <Typography component="li">Carefully read the questions and select the correct answer.</Typography>
-                    <Typography component="li">Click the 'next' button to move to the next question.</Typography>
+                    <Typography component="li">Click the 'check' button to submit the answer</Typography>
+                    <Typography component="li">Click the 'next' button to go to the next question</Typography>
                     <Typography component="li">This is a sequential quiz; you cannot go back to the previous question.</Typography>
                 </Typography>
 
