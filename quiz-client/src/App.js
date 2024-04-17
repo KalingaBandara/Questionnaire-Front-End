@@ -7,6 +7,7 @@ import Result from './components/Result';
 
 function App() {
   return (
+    // Wrap the application in a BrowserRouter to enable routing
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Start />} />

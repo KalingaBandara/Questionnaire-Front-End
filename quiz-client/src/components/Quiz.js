@@ -9,7 +9,8 @@ import Alert from '@mui/material/Alert';
 
 
 export default function Quiz() {
-
+   
+    // Define states for quiz data, question index, time taken, feedback, alert, and other flags
     const [qns, setQns] = useState([])
     const [qnIndex, setQnIndex] = useState(0)
     const [timeTaken, setTimeTaken] = useState(0)
@@ -23,31 +24,35 @@ export default function Quiz() {
     const [showUnavailableAlert,setShowUnavailableAlert] = useState(false)
     const [showCheckButton, setShowCheckButton] = useState(true);
 
-
+    // Retrieve JWT token from local storage
     const jwtToken = localStorage.getItem('jwtToken');
 
-
+    // Declare a timer variable
     let timer;
 
+    // Function to start the timer for tracking time taken during the quiz
     const startTimer = () => {
         timer = setInterval(() => {
             setTimeTaken(prev => prev + 1)
         }, [1000])
     }
 
+    // useEffect hook to fetch quiz questions when the component mounts
     useEffect(() => {
+        // Initialize context
         setContext({
             timeTaken: 0,
             selectedOptions: []
         });
 
-        
+        // Fetch questions from the API endpoint        
         createAPIEndpoint(ENDPOINTS.getQuestions,jwtToken)
             .fetch() 
             .then(res => {
+                // Add selectedOption field to each question
                 const updatedData = res.data.map(item => ({ ...item, selectedOption: "" }));
                 setQns(updatedData);
-                startTimer()
+                startTimer() // Start the timer
             })
             .catch(err => { 
                 console.log(err); 
@@ -57,10 +62,11 @@ export default function Quiz() {
                     navigate('/result');
                 }, 1500);
             });
-
+        // Clear the timer when the component unmounts
         return () => { clearInterval(timer) }
-    }, [])
+    }, []);
 
+    // Function to update the answer selected by the user
     const updateAnswer = (qnId, optionIdx) => {
 
         // Create a copy of the selectedOptions array
@@ -86,7 +92,8 @@ export default function Quiz() {
             
             }
     };
-    
+
+    // Function to update feedback for the selected option
     const updateFeedback = (qnId, optionIdx) => {
         const selectedQuestion = qns.find(question => question.questionId === qnId);
         if (selectedQuestion) {
@@ -101,6 +108,7 @@ export default function Quiz() {
         }
     }
 
+    // Handle the feedback button click
     const handleFeedbackClick = () => {
         // Check if an option is selected
         if (context.selectedOptions[qnIndex]?.selected === undefined || context.selectedOptions[qnIndex]?.selected === null) {
@@ -117,6 +125,7 @@ export default function Quiz() {
         setShowCheckButton(false);
     };
     
+    // Handle the next button click
     const handleNextClick = () => {
         // Hide feedback and enable options after a delay
         setTimeout(() => {
@@ -129,9 +138,9 @@ export default function Quiz() {
                 setQnIndex(prevIndex => prevIndex + 1);
             } else if (qnIndex === 9) {
                 // If it's the last question, navigate to the result
-                console.log("Navigated to /result");
-                console.log("Selected options array:", context.selectedOptions);
-    
+                //console.log("Navigated to /result");
+                //console.log("Selected options array:", context.selectedOptions);
+                // Update attempt status and calculate score
                 createAPIEndpoint(ENDPOINTS.updateAttemptStatus, jwtToken)
                     .fetch()
                     .then(response => {

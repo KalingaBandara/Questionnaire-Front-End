@@ -5,11 +5,17 @@ import { green, yellow, red } from '@mui/material/colors';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 export default function Result() {
-  
+
+  // State to store the score from the API response
   const [score, setScore] = useState(0);
+
+  // State to control whether to show an alert in case of error
   const [showAlert, setShowAlert] = useState(false);
+  
+  // Get JWT token from local storag
   const jwtToken = localStorage.getItem('jwtToken');
 
+  // Fetches the score from the API endpoint
   useEffect(() => {
     createAPIEndpoint(ENDPOINTS.getScore, jwtToken)
     .fetch()
@@ -27,7 +33,7 @@ export default function Result() {
 }, [setShowAlert]);
 
 
-
+// Determine the color of the score based on its value
 let scoreColor;
   if (score >= 7) {
     scoreColor = green[500];
@@ -37,6 +43,7 @@ let scoreColor;
     scoreColor = red[500];
   }
 
+  // Calculate the number of lawn mowers as the reward
   const lawnMowers = Math.floor(score / 2);
 
   return (
